@@ -1,3 +1,5 @@
+Cleaning done in Excel.
+
 In "policies.csv":
 
 - Deleted first column
