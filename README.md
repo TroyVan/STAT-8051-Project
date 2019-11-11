@@ -28,7 +28,7 @@
 
 # Fields in drivers.csv
 
-| Field label        | Description                   | Format/type of data              | Range                                       |
+| Field label        | Description                   | Type of data                     | Range                                       |
 |--------------------|-------------------------------|----------------------------------|---------------------------------------------|
 | policy_id          | Unique customer identifier    | ID                               | policy_##### (may be shorter than 5 digits) |
 | gender             | Gender of driver              | Factor / Boolean                 | F, M                                        |
@@ -39,7 +39,7 @@
 
 # Fields in vehicles.csv
 
-| Field label    | Description                                | Format/type of data    | Range                                            |
+| Field label    | Description                                | Type of data           | Range                                            |
 |----------------|--------------------------------------------|------------------------|--------------------------------------------------|
 | policy_id      | Unique customer identifier                 | ID                     | policy_##### (may be shorter than 5 digits)      |
 | car_no         | Unique car identifier (per policy)         | ID                     | 1 - 8                                            |
