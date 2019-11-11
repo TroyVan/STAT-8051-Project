@@ -39,3 +39,66 @@ vehicles <- read_csv("vehicles edited 2019-11-10.csv", col_types = cols(
   ownership_type = col_factor(levels = c("leased", "loaned", "owned")),
   policy_id = col_character()
 ))
+
+# Split train and test policies
+
+policies_train = policies[policies$split == "Train",]
+policies_test = policies[policies$split == "Test",]
+policies_train$split = NULL
+policies_test$split = NULL
+policies_test$convert_ind = NULL
+
+# Split train and test drivers
+
+for(i in 1:dim(drivers)[1]){
+  drivers$matching_train_policies[i] = length(which(drivers$policy_id[i] == policies_train$policy_id))
+  drivers$matching_test_policies[i] = length(which(drivers$policy_id[i] == policies_test$policy_id))
+}
+remove(i)
+
+# Verify that each driver is matched to either a test policy or a train policy
+drivers$total_matching_policies = drivers$matching_train_policies + drivers$matching_test_policies
+library(dplyr)
+count(drivers, matching_train_policies) # Should be all 0's and 1's
+count(drivers, matching_test_policies) # Should be all 0's and 1's
+count(drivers, total_matching_policies) # Should be all 1's
+drivers$total_matching_policies = NULL
+
+drivers_train = drivers[drivers$matching_train_policies == 1,]
+drivers_test = drivers[drivers$matching_test_policies == 1,]
+drivers$matching_train_policies = NULL
+drivers$matching_test_policies = NULL
+drivers_train$matching_train_policies = NULL
+drivers_train$matching_test_policies = NULL
+drivers_test$matching_train_policies = NULL
+drivers_test$matching_test_policies = NULL
+
+# Split train and test vehicles
+
+for(i in 1:dim(vehicles)[1]){
+  vehicles$matching_train_policies[i] = length(which(vehicles$policy_id[i] == policies_train$policy_id))
+  vehicles$matching_test_policies[i] = length(which(vehicles$policy_id[i] == policies_test$policy_id))
+}
+remove(i)
+
+# Verify that each vehicle is matched to either a test policy or a train policy
+vehicles$total_matching_policies = vehicles$matching_train_policies + vehicles$matching_test_policies
+library(dplyr)
+count(vehicles, matching_train_policies) # Should be all 0's and 1's
+count(vehicles, matching_test_policies) # Should be all 0's and 1's
+count(vehicles, total_matching_policies) # Should be all 1's
+vehicles$total_matching_policies = NULL
+
+vehicles_train = vehicles[vehicles$matching_train_policies == 1,]
+vehicles_test = vehicles[vehicles$matching_test_policies == 1,]
+vehicles$matching_train_policies = NULL
+vehicles$matching_test_policies = NULL
+vehicles_train$matching_train_policies = NULL
+vehicles_train$matching_test_policies = NULL
+vehicles_test$matching_train_policies = NULL
+vehicles_test$matching_test_policies = NULL
+
+# Drop original databases (optional)
+remove(drivers)
+remove(policies)
+remove(vehicles)
