@@ -3,6 +3,11 @@ library(tidyverse)
 library(pscl)
 library(tweedie)
 library(pROC)
+
+
+# import data -------------------------------------------------------------
+
+
 policies <- read_csv("policies.csv")
 policies$AMT <- as.numeric(gsub('[$,]', '', policies$quoted_amt))
 policies <- policies %>%
@@ -13,6 +18,10 @@ train <- policies %>%
 
 test <- policies  %>% 
   filter(split == 'Test')
+
+
+# data visualization ------------------------------------------------------
+
 
 ggplot(train, aes(convert_ind)) +
   geom_bar() +
@@ -29,8 +38,15 @@ ggplot(train, aes(x = factor(convert_ind), y = credit_score)) +
 ggplot(train, aes(x = factor(convert_ind), y = AMT)) +
   geom_boxplot()
 
+
+
+# logit model construction ------------------------------------------------
+
+
 logit_fit <- glm(convert_ind ~ AMT + DISC + credit_score + factor(num_loaned_veh) + factor(num_owned_veh) + factor(num_leased_veh), data = train, family = 'binomial')
 summary(logit_fit)
+
+# predict for train
 train_pred <- predict(logit_fit, train, type = 'response')
 train$conv_prob <- train_pred
 train <- train %>%
@@ -39,6 +55,7 @@ train <- train %>%
 
 auc(train$convert_ind, train$conv_prob)
 
+# predict for test
 pred <- predict(logit_fit, test, type = 'response')
 
 test$conv_prob <- pred
@@ -46,4 +63,5 @@ test <- test %>%
   select(policy_id, conv_prob) %>%
   mutate(conv_prob = replace_na(conv_prob, 0))
 
+# write file
 write.csv(test, 'test.csv', row.names = F)
