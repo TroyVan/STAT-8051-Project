@@ -35,7 +35,7 @@
 | age                | Age of driver                 | Approx. continuous (nonnegative) | 16 - 147                                    |
 | high_education_ind | Higher education indicator    | Boolean                          | 0, 1, NA                                    |
 | safty_rating       | Safety rating index of driver | Approx. continuous               | -28 - 100, NA                               |
-| living_status      | Driver’s living status        | Factor                           | dependent, own, rent, NA                    |
+| living_status      | Driver's living status        | Factor                           | dependent, own, rent, NA                    |
 
 # Fields in vehicles.csv
 
