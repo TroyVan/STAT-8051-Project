@@ -43,7 +43,7 @@ ggplot(train, aes(x = factor(convert_ind), y = AMT)) +
 # logit model construction ------------------------------------------------
 
 
-logit_fit <- glm(convert_ind ~ AMT + DISC + credit_score + factor(num_loaned_veh) + factor(num_owned_veh) + factor(num_leased_veh), data = train, family = 'binomial')
+logit_fit <- glm(convert_ind ~ AMT + factor(DISC) + credit_score + factor(num_loaned_veh) + factor(num_owned_veh) + factor(num_leased_veh) + factor(Cov_package_type) + factor(CAT_zone) + factor(primary_parking), data = train, family = 'binomial')
 summary(logit_fit)
 
 # predict for train
@@ -51,7 +51,7 @@ train_pred <- predict(logit_fit, train, type = 'response')
 train$conv_prob <- train_pred
 train <- train %>%
   select(policy_id, conv_prob, convert_ind) %>%
-  mutate(conv_prob = replace_na(conv_prob, 0))
+  mutate(conv_prob = replace_na(conv_prob, 0.5))
 
 auc(train$convert_ind, train$conv_prob)
 
@@ -61,7 +61,37 @@ pred <- predict(logit_fit, test, type = 'response')
 test$conv_prob <- pred
 test <- test %>%
   select(policy_id, conv_prob) %>%
-  mutate(conv_prob = replace_na(conv_prob, 0))
+  mutate(conv_prob = replace_na(conv_prob, 0.5))
+
+# write file
+write.csv(test, 'test.csv', row.names = F)
+
+
+
+# tweedie -----------------------------------------------------------------
+
+form <- convert_ind ~ AMT + factor(DISC) + credit_score + factor(num_loaned_veh) + factor(num_owned_veh) + factor(num_leased_veh) + factor(Cov_package_type) + factor(CAT_zone) + factor(primary_parking)
+
+ini_coef <- glm(form, data = train, family = poisson)$coefficients
+
+tw_fit <- glm(form , data = train, family=tweedie(var.power=1.5,link.power=0), start = ini_coef)
+summary(tw_fit)
+
+
+train_pred <- predict(tw_fit, train, type = 'response')
+train$conv_prob <- train_pred
+train <- train %>%
+  mutate(conv_prob = replace_na(conv_prob, 0.5))
+
+auc(train$convert_ind, train$conv_prob)
+
+# predict for test
+pred <- predict(logit_fit, test, type = 'response')
+
+test$conv_prob <- pred
+test <- test %>%
+  select(policy_id, conv_prob) %>%
+  mutate(conv_prob = replace_na(conv_prob, 0.5))
 
 # write file
 write.csv(test, 'test.csv', row.names = F)
