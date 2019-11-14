@@ -70,7 +70,7 @@ write.csv(test, 'test.csv', row.names = F)
 
 # tweedie -----------------------------------------------------------------
 
-form <- convert_ind ~ AMT + factor(DISC) + credit_score + factor(num_loaned_veh) + factor(num_owned_veh) + factor(num_leased_veh) + factor(Cov_package_type) + factor(CAT_zone) + factor(primary_parking)
+form <- convert_ind ~ AMT + factor(DISC) + credit_score + factor(num_loaned_veh) + factor(num_owned_veh) + factor(num_leased_veh) + factor(Cov_package_type) + factor(CAT_zone) + factor(primary_parking) + factor(Home_policy_ind)
 
 ini_coef <- glm(form, data = train, family = poisson)$coefficients
 
@@ -86,7 +86,7 @@ train <- train %>%
 auc(train$convert_ind, train$conv_prob)
 
 # predict for test
-pred <- predict(logit_fit, test, type = 'response')
+pred <- predict(tw_fit, test, type = 'response')
 
 test$conv_prob <- pred
 test <- test %>%
