@@ -81,7 +81,7 @@ summary(tw_fit)
 train_pred <- predict(tw_fit, train, type = 'response')
 train$conv_prob <- train_pred
 train <- train %>%
-  mutate(conv_prob = replace_na(conv_prob, 0.5))
+  mutate(conv_prob = replace_na(conv_prob, 0))
 
 auc(train$convert_ind, train$conv_prob)
 
