@@ -11,6 +11,7 @@ policy$quoted_amt <- as.numeric(gsub('[$,]', '', policy$quoted_amt)) # transfer 
 
 policy_clean <- policy %>%
   select(-X1) %>%
+  mutate(policy_NA = rowSums(is.na(.))) %>%
   mutate(discount = if_else(discount == 'Yes', 1, 0),
          Home_policy_ind = if_else(Home_policy_ind == 'Y', 1, 0),
          Carrier1 = if_else(Prior_carrier_grp == 'Carrier_1', 1, 0, missing = 0),
@@ -39,6 +40,7 @@ policy_clean <- policy %>%
 
 driver_clean <- driver %>%
   select(-X1) %>%
+  mutate(driver_NA = rowSums(is.na(.))) %>%
   mutate(gender_male = if_else(gender == 'M', 1, 0),
          gender_female = if_else(gender == 'F', 1, 0),
          liv_own = if_else(living_status == 'own', 1, 0, missing = 0),
@@ -59,7 +61,8 @@ driver_clean <- driver %>%
             num_young = sum(age_young),
             num_adult = sum(age_adult),
             num_old = sum(age_old),
-            mean_age = mean(age))
+            mean_age = mean(age),
+            driver_NA = mean(driver_NA))
 
 driver_clean$mean_safe[is.na(driver_clean$mean_safe)] <- NA
 driver_clean$mean_edu[is.na(driver_clean$mean_edu)] <- NA
@@ -73,6 +76,7 @@ veh_brand <- vehicle %>%
 
 vehicle_clean <- vehicle %>%
   select(-X1, -make_model) %>%
+  mutate(veh_NA = rowSums(is.na(.))) %>%
   mutate(lease = if_else(ownership_type == 'leased', 1, 0, missing = 0),
          loan = if_else(ownership_type == 'loaned', 1, 0, missing = 0),
          own = if_else(ownership_type == 'owned', 1, 0, missing = 0)) %>%
@@ -81,14 +85,17 @@ vehicle_clean <- vehicle %>%
            act_num_loaned_veh = sum(loan),
            act_num_owned_veh = sum(own),
            act_num_veh = n(),
-           mean_car_age = mean(age, na.rm = T)) %>%
+           mean_car_age = mean(age, na.rm = T),
+           veh_NA = mean(veh_NA)) %>%
   left_join(veh_brand, by = 'policy_id')
 
 vehicle_clean$mean_car_age[is.na(vehicle_clean$mean_car_age)] <- NA
 
 merge_policy <- policy_clean %>%
   left_join(driver_clean, by = 'policy_id') %>%
-  left_join(vehicle_clean, by = 'policy_id')
+  left_join(vehicle_clean, by = 'policy_id') %>%
+  mutate(num_NA = policy_NA + veh_NA + driver_NA) %>%
+  select(-policy_NA, -veh_NA, -driver_NA)
 
 train <- merge_policy %>%
   filter(split == 'Train') %>%

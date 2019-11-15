@@ -17,11 +17,11 @@ num_loaned_veh: Not change.
 num_owned_veh: Not change.
 num_leased_veh: Not change.
 total_number_veh: Not change.
-primary_parking: WhTo 3 dummy variables: Parking_street, Parking_home, Parking_garage (I did not code type of 'unknown').
+primary_parking: To 3 dummy variables: Parking_street, Parking_home, Parking_garage (I did not code type of 'unknown').
 CAT_zone: To 5 dummy variables: Catzone1 - Catzone5.
 home_policy_ind: To dummy variable.
 zip: Not change.
-state_id: Not change.
+state_id: To dummy varialbes with the name as the state.
 county_name: Not change.
 agent_cd: Not change.
 split: Train/Test split
@@ -41,4 +41,4 @@ car_no: Not change.
 ownership_type: Compute the number for each type as act_num_leased_veh, act_num_loaned_veh, act_num_owned_veh, also compute the total number of drivers for each policy as act_num_veh.
 color: Not change.
 age: Compute the mean value as mean_car_age (na.rm = T).
-make_model: Not change.
+make_model: To dummy varialbes with the name as the brand.
