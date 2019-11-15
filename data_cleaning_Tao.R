@@ -61,6 +61,7 @@ vehicle <- vehicle %>%
   summarise(act_num_leased_veh = sum(lease),
            act_num_loaned_veh = sum(loan),
            act_num_owned_veh = sum(own),
+           act_num_veh = n(),
            mean_car_age = mean(age, na.rm = T))
 
 vehicle$mean_car_age[is.na(vehicle$mean_car_age)] <- NA
