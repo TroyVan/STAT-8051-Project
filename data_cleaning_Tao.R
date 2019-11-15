@@ -7,7 +7,7 @@ policy <- read_csv("policies.csv")
 driver <- read_csv('drivers.csv')
 vehicle <- read_csv('vehicles.csv')
 
-policy$quoted_amt <- as.numeric(gsub('[$,]', '', policies$quoted_amt)) # transfer dollar to number
+policy$quoted_amt <- as.numeric(gsub('[$,]', '', policy$quoted_amt)) # transfer dollar to number
 
 policy <- policy %>%
   select(-X1) %>%
@@ -85,3 +85,19 @@ policy_zero$cv_index <- cut(seq(1, nrow(policy_zero)), breaks = 10, labels = F)
 train <- rbind(policy_one, policy_zero)
 
 save(train, test,  file = 'tao.RData')
+
+
+# data preparation for python ---------------------------------------------
+
+load('tao.RData')
+
+train <- train %>%
+  select(-Quote_dt, -zip, -state_id, -county_name, -Agent_cd, -Prior_carrier_grp, -Cov_package_type,
+         -CAT_zone, -policy_id, -split, -primary_parking) %>%
+  select(convert_ind, everything())
+
+test <- test %>%
+  select(-convert_ind, -Quote_dt, -zip, -state_id, -county_name, -Agent_cd, -Prior_carrier_grp, -Cov_package_type,
+
+write.csv(train, 'train.csv', row.names = F, na = '')
+write.csv(test, 'test.csv', row.names = F, na = '')
