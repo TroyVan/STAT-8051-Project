@@ -98,7 +98,8 @@ train <- train %>%
 
 test <- test %>%
   select(-convert_ind, -Quote_dt, -zip, -state_id, -county_name, -Agent_cd, -Prior_carrier_grp, -Cov_package_type,
-         -CAT_zone, -policy_id, -split, -primary_parking) 
+         -CAT_zone, -split, -primary_parking)  %>%
+  select(policy_id, everything())
 
 write.csv(train, 'train.csv', row.names = F, na = '')
 write.csv(test, 'test.csv', row.names = F, na = '')
