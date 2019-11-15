@@ -55,21 +55,24 @@ class Net(nn.Module):
    
     def __init__(self):
         super().__init__()
-        self.fc1 = nn.Linear(40, 80)
-        self.fc2 = nn.Linear(80, 2)
+        self.fc1 = nn.Linear(40, 2)
+        self.fc2 = nn.Linear(2, 2)
+        self.fc3 = nn.Linear(2, 2)
         
     def forward(self, x):
         x = self.fc1(x)
         x = F.tanh(x)
         x = self.fc2(x)
+        x = F.tanh(x)
+        x = self.fc3(x)
         softm = F.softmax(x, dim = 1)
         return softm
 
 network = Net()
 loss_fun = nn.CrossEntropyLoss()
-optimizer = optim.Adam(network.parameters(), lr = 0.01)
+optimizer = optim.Adam(network.parameters(), lr = 0.001)
 
-epochs = 100
+epochs = 1500
 losses = []
 
 for i in range(epochs):
