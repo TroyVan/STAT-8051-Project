@@ -52,3 +52,18 @@ glmcv(convert_ind ~ discount + state_id + quoted_amt +
         Prior_carrier_grp + credit_score + Cov_package_type + CAT_zone + 
         number_drivers + primary_parking)
 # Cross-Validation AUC = .6388
+
+test_predictions = data.frame(
+  policy_id = policies_test$policy_id,
+  conv_prob = predict(
+    glm(
+      convert_ind ~ discount + state_id + quoted_amt +
+        Prior_carrier_grp + credit_score + Cov_package_type + CAT_zone +
+        number_drivers + primary_parking,
+      binomial, policies_train
+    ), policies_test, type = "response"
+  )
+)
+# If no predicted probablity, use mean conversion rate as default
+test_predictions$conv_prob[is.na(test_predictions$conv_prob)] = mean(policies_train$convert_ind)
+write.csv(test_predictions, "Troy's GLM exploration test predictions 2019-11-16")
