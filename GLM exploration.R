@@ -18,6 +18,8 @@ glmcv = function(formula) {
   auc(response = policies_train$convert_ind, predictor = policies_train$pred_prob)
 }
 
+# First, start with some "reasonable" predictors
+
 glmcv(convert_ind ~ quoted_amt + discount + Home_policy_ind + Prior_carrier_grp +
         credit_score + Cov_package_type + CAT_zone + number_drivers + total_number_veh +
         primary_parking)
@@ -32,3 +34,21 @@ glmcv(convert_ind ~ quoted_amt + discount + Prior_carrier_grp +
         credit_score + Cov_package_type + CAT_zone + number_drivers + 
         primary_parking)
 # Cross-Validation AUC = .6342
+
+# Now let's add in almost all predictors
+
+glmcv(convert_ind ~ discount + Home_policy_ind + state_id + quoted_amt + Prior_carrier_grp +
+        credit_score + Cov_package_type + CAT_zone + number_drivers + num_loaned_veh +
+        num_owned_veh + num_leased_veh + total_number_veh + primary_parking)
+# Cross-Validation AUC = .6380
+
+summary(step(glm(convert_ind ~ discount + Home_policy_ind + state_id + quoted_amt + Prior_carrier_grp +
+                   credit_score + Cov_package_type + CAT_zone + number_drivers + num_loaned_veh +
+                   num_owned_veh + num_leased_veh + total_number_veh + primary_parking,
+                 binomial, policies_train), trace = 0))
+# Dropped Home_policy_ind, num_loaned_veh, num_owned_veh, num_leased_veh, total_number_veh
+
+glmcv(convert_ind ~ discount + state_id + quoted_amt + 
+        Prior_carrier_grp + credit_score + Cov_package_type + CAT_zone + 
+        number_drivers + primary_parking)
+# Cross-Validation AUC = .6388
