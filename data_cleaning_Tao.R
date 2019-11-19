@@ -42,7 +42,7 @@ policy_clean <- policy %>%
          count = 1) %>%
   spread(month, count, fill = 0) %>%
   select(-Prior_carrier_grp, -Cov_package_type, -CAT_zone,
-         -primary_parking, -zip, -county_name, -Agent_cd, -day)
+         -primary_parking, -zip, -county_name, -Agent_cd, -day, -Quote_dt)
 
 driver_clean <- driver %>%
   select(-X1) %>%
@@ -132,5 +132,5 @@ write.csv(test, 'test.csv', row.names = F, na = '')
 
 # glm ---------------------------------------------------------------------
 
-glm_fit <- glm(convert_ind ~ . - cv_index, data = train, family = binomial)
+glm_fit <- glm(convert_ind ~ . , data = train, family = binomial)
 summary(glm_fit)
