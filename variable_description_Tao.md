@@ -42,3 +42,6 @@ ownership_type: Compute the number for each type as act_num_leased_veh, act_num_
 color: Not change.
 age: Compute the mean value as mean_car_age (na.rm = T).
 make_model: To dummy varialbes with the name as the brand.
+
+Others:
+num_NA: compute the number of NA in each obs.

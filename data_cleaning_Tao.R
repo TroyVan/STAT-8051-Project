@@ -1,5 +1,6 @@
 library(readr)
 library(tidyverse)
+library(lubridate)
 
 # import and code data -------------------------------------------------------------
 
@@ -35,8 +36,13 @@ policy_clean <- policy %>%
          Parking_street = if_else(primary_parking == 'street', 1, 0)) %>%
   mutate(count = 1) %>%
   spread(state_id, count, fill = 0) %>%
+  mutate(month = month(Quote_dt, label = T),
+         day = wday(Quote_dt)) %>%
+  mutate(wday = if_else(day <= 5, 1, 0),
+         count = 1) %>%
+  spread(month, count, fill = 0) %>%
   select(-Prior_carrier_grp, -Cov_package_type, -CAT_zone,
-         -primary_parking, -Quote_dt, -zip, -county_name, -Agent_cd)
+         -primary_parking, -zip, -county_name, -Agent_cd, -day, -Quote_dt)
 
 driver_clean <- driver %>%
   select(-X1) %>%
@@ -113,10 +119,18 @@ policy_one <- filter(train, convert_ind == 1)
 policy_zero <- filter(train, convert_ind == 0)
 policy_one <- policy_one[sample(nrow(policy_one)), ]
 policy_zero <- policy_zero[sample(nrow(policy_zero)), ]
-policy_one$cv_index <- cut(seq(1, nrow(policy_one)), breaks = 10, labels = F)
-policy_zero$cv_index <- cut(seq(1, nrow(policy_zero)), breaks = 10, labels = F)
+policy_one$cv_index <- cut(seq(1, nrow(policy_one)), breaks = 3, labels = F)
+policy_zero$cv_index <- cut(seq(1, nrow(policy_zero)), breaks = 3, labels = F)
 
 train <- rbind(policy_one, policy_zero)
 
 save(train, test,  file = 'tao.RData')
 
+write.csv(train, 'train.csv', row.names = F, na = '')
+write.csv(test, 'test.csv', row.names = F, na = '')
+
+
+# glm ---------------------------------------------------------------------
+
+glm_fit <- glm(convert_ind ~ . , data = train, family = binomial)
+summary(glm_fit)
