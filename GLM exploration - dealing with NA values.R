@@ -46,3 +46,5 @@ test_predictions = data.frame(
 sum(is.na(test_predictions$conv_prob))
 
 write.csv(test_predictions, "Troy's GLM exploration test predictions 2019-11-20.csv", row.names = FALSE)
+
+# Test AUC = .61661
