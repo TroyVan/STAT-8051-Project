@@ -103,3 +103,72 @@ glmcv(convert_ind ~ discount + state_id + quoted_amt +
         max_age + avg_age + prop_high_education + max_vehicle_age + 
         avg_vehicle_age)
 # Cross-Validation AUC = .6461, a new record
+
+# Create extra variables
+
+for(i in 1:dim(policies_test)[1]){
+  policies_test$matching_loaned_vehicles[i] = length(which(policies_test$policy_id[i] == vehicles_test$policy_id & vehicles_test$ownership_type == "loaned"))
+  policies_test$matching_owned_vehicles[i] = length(which(policies_test$policy_id[i] == vehicles_test$policy_id & vehicles_test$ownership_type == "owned"))
+  policies_test$matching_leased_vehicles[i] = length(which(policies_test$policy_id[i] == vehicles_test$policy_id & vehicles_test$ownership_type == "leased"))
+  if(i %% 1000 == 0) print(i)
+}
+policies_test$total_matching_vehicles = policies_test$matching_loaned_vehicles + policies_test$matching_owned_vehicles + policies_test$matching_leased_vehicles
+
+for(i in 1:dim(policies_test)[1]){
+  matching_drivers = drivers_test[which(policies_test$policy_id[i] == drivers_test$policy_id),]
+  
+  policies_test$prop_male[i] = mean(matching_drivers$gender == "M")
+  
+  if(sum(matching_drivers$living_status == "own", na.rm = TRUE) > 0) policies_test$living_status[i] = "own"
+  else if(sum(matching_drivers$living_status == "rent", na.rm = TRUE) > 0) policies_test$living_status[i] = "rent"
+  else if(sum(matching_drivers$living_status == "dependent", na.rm = TRUE) > 0) policies_test$living_status[i] = "dependent"
+  else policies_test$living_status[i] = NA
+  
+  policies_test$min_age[i] = min(matching_drivers$age)
+  policies_test$max_age[i] = max(matching_drivers$age)
+  policies_test$avg_age[i] = mean(matching_drivers$age)
+  
+  policies_test$min_safety_rating[i] = min(matching_drivers$safty_rating, na.rm = TRUE)
+  policies_test$max_safety_rating[i] = max(matching_drivers$safty_rating, na.rm = TRUE)
+  policies_test$avg_safety_rating[i] = mean(matching_drivers$safty_rating, na.rm = TRUE)
+  
+  policies_test$prop_high_education[i] = mean(matching_drivers$high_education_ind, na.rm = TRUE)
+  
+  matching_vehicles = vehicles_test[which(policies_test$policy_id[i] == vehicles_test$policy_id),]
+  
+  policies_test$min_vehicle_age[i] = min(matching_vehicles$age, na.rm = TRUE)
+  policies_test$max_vehicle_age[i] = max(matching_vehicles$age, na.rm = TRUE)
+  policies_test$avg_vehicle_age[i] = mean(matching_vehicles$age, na.rm = TRUE)
+  
+  if(i %% 1000 == 0) print(i)
+}
+policies_test$min_safety_rating[which(is.infinite(policies_test$min_safety_rating))] = NA
+policies_test$max_safety_rating[which(is.infinite(policies_test$max_safety_rating))] = NA
+policies_test$avg_safety_rating[which(is.nan(policies_test$avg_safety_rating))] = NA
+
+policies_test$prop_high_education[which(is.nan(policies_test$prop_high_education))] = NA
+
+policies_test$min_vehicle_age[which(is.infinite(policies_test$min_vehicle_age))] = NA
+policies_test$max_vehicle_age[which(is.infinite(policies_test$max_vehicle_age))] = NA
+policies_test$avg_vehicle_age[which(is.nan(policies_test$avg_vehicle_age))] = NA
+
+policies_test$living_status = as.factor(policies_test$living_status)
+
+test_predictions = data.frame(
+  policy_id = policies_test$policy_id,
+  conv_prob = predict(
+    glm(
+      convert_ind ~ discount + state_id + quoted_amt + 
+        Prior_carrier_grp + credit_score + Cov_package_type + CAT_zone + 
+        number_drivers + primary_parking + matching_owned_vehicles + 
+        matching_leased_vehicles + living_status + min_age + 
+        max_age + avg_age + prop_high_education + max_vehicle_age + 
+        avg_vehicle_age,
+      binomial, policies_train
+    ), policies_test, type = "response"
+  )
+)
+# If no predicted probablity, use mean conversion rate as default
+test_predictions$conv_prob[is.na(test_predictions$conv_prob)] = mean(policies_train$convert_ind)
+write.csv(test_predictions, "Troy's GLM exploration test predictions 2019-11-21.csv", row.names = FALSE)
+# Test AUC = .63817, best so far
