@@ -12,10 +12,10 @@
 | discount          | Whether or not a discount was applied to the quote amount           | Boolean                       | Yes, No                                           |
 | number_drivers    | Number of drivers                                                   | Discrete (positive)           | 1 - 6                                             |
 | credit_score      | Credit score of primary policy holder                               | Approx. continuous (positive) | 369 - 850, NA (credit score can go as low as 350) |
-| num_loaned_veh    | Number of vehicles on policy that have a loan associated with them  | Discrete (nonnegative)        | 0 - 3                                             |
-| num_owned_veh     | Number of owned vehicles on the policy                              | Discrete (nonnegative)        | 1 - 3                                             |
-| num_leased_veh    | Number of leased vehicles on the policy                             | Discrete (nonnegative)        | 0 - 2                                             |
-| total_number_veh  | Total number vehicles on the policy                                 | Discrete (nonnegative)        | 1 - 8                                             |
+| ~num_loaned_veh~  | Number of vehicles on policy that have a loan associated with them  | Discrete (nonnegative)        | 0 - 3 **Inaccurate; do not use**                  |
+| ~num_owned_veh~   | Number of owned vehicles on the policy                              | Discrete (nonnegative)        | 1 - 3 **Inaccurate; do not use**                  |
+| ~num_leased_veh~  | Number of leased vehicles on the policy                             | Discrete (nonnegative)        | 0 - 2 **Inaccurate; do not use**                  |
+| ~total_number_veh~| Total number vehicles on the policy                                 | Discrete (nonnegative)        | 1 - 8 **Inaccurate; do not use**                  |
 | primary_parking   | Where car(s) are primarily parked                                   | Factor                        | home/driveway, parking garage, street, unknown    |
 | CAT_zone          | Catastrophe risk zone                                               | Factor                        | 1 - 5, NA                                         |
 | Home_policy_ind   | Does customer has existing home insurance policy with Peace of Mind | Boolean                       | Y, N                                              |
