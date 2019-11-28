@@ -98,8 +98,8 @@ summary(step(glm(convert_ind ~ discount + Home_policy_ind + state_id + quoted_am
 
 glmcv(convert_ind ~ discount + state_id + quoted_amt + 
         Prior_carrier_grp + credit_score + Cov_package_type + CAT_zone + 
-        number_drivers + primary_parking + matching_owned_vehicles_train + 
-        matching_leased_vehicles_train + living_status + min_age + 
+        number_drivers + primary_parking + matching_owned_vehicles + 
+        matching_leased_vehicles + living_status + min_age + 
         max_age + avg_age + prop_high_education + max_vehicle_age + 
         avg_vehicle_age)
 # Cross-Validation AUC = .6461, a new record
