@@ -1,0 +1,267 @@
+---
+title: "Data_exploration_Tao"
+author: "Tao Tao"
+date: "11/23/2019"
+output: pdf_document
+---
+
+Load the cleaned data.
+
+```{r}
+library(readr)
+policy <- read_csv("policies.csv")
+```
+
+```{r}
+library(tidyverse)
+train <- policy %>%
+  filter(split == 'Train')
+```
+
+
+```{r}
+nrow(train)
+ncol(train)
+```
+
+There are 36871 observations in the train dataset. And 20 variables when excluding convert_ind and split.
+
+## convert_ind
+
+```{r}
+summary(factor(train$convert_ind))
+```
+
+```{r}
+4120/32751
+```
+
+The overall convert rate is 0.1258.
+
+## quoted_amt
+
+```{r}
+train$quoted_amt <- as.numeric(gsub('[$,]', '', train$quoted_amt))
+summary(train$quoted_amt)
+```
+
+```{r}
+cor.test(train$convert_ind, train$quoted_amt)
+```
+
+A negative correlation between quoted_amt and convert_ind. This may be a important feature. Higher quoted_amt introduces lower convert_ind, which is interesting.
+
+## discount
+
+```{r}
+train <- train %>%
+  mutate(discount = if_else( discount == 'Yes', 1, 0))
+summary(factor(train$discount))
+```
+
+```{r}
+cor.test(train$convert_ind, train$discount)
+```
+
+There is a positive correlation between discount and convert_ind. The policy of discount introduces higher convert_ind, which makes sense.
+
+## Home_policy_ind
+
+```{r}
+train <- train %>%
+  mutate(Home_policy_ind = if_else( Home_policy_ind == 'Y', 1, 0))
+summary(factor(train$Home_policy_ind))
+```
+
+```{r}
+cor.test(train$convert_ind, train$Home_policy_ind)
+```
+
+There is a positive correlation between discount and Home_policy_ind. If the customer has bought the home insurance in this company, then the customer is more likely to buy car insurance in the same company.
+
+## credit_score
+
+```{r}
+summary(train$credit_score)
+```
+
+```{r}
+cor.test(train$convert_ind, train$credit_score)
+```
+
+There is a positive correlation between discount and credit_score. If the customer has a higher credit score, the customer intends to convert.
+
+## Prior_carrier_grp
+
+```{r}
+train %>%
+  group_by(Prior_carrier_grp) %>%
+  summarise(convert_rate = sum(convert_ind)/n()) %>%
+  ggplot(aes(x = Prior_carrier_grp, y = convert_rate)) +
+  geom_col()
+```
+
+## cov_package_type
+
+```{r}
+train %>%
+  group_by(Cov_package_type) %>%
+  summarise(convert_rate = sum(convert_ind)/n()) %>%
+  ggplot(aes(x = Cov_package_type, y = convert_rate)) +
+  geom_col()
+```
+
+## quote_dt
+
+#### year
+
+```{r}
+library(lubridate)
+train %>%
+  mutate(year = year(Quote_dt)) %>%
+  group_by(year) %>%
+  summarise(convert_rate = sum(convert_ind)/n()) %>%
+  ggplot(aes(x = year, y = convert_rate)) +
+  geom_col()
+```
+
+Bad news for the company.
+
+#### month
+
+```{r}
+train %>%
+  mutate(month = month(Quote_dt, label = T)) %>%
+  group_by(month) %>%
+  summarise(convert_rate = sum(convert_ind)/n()) %>%
+  ggplot(aes(x = month, y = convert_rate)) +
+  geom_col()
+```
+
+#### day of month
+
+```{r}
+train %>%
+  mutate(day = day(Quote_dt)) %>%
+  group_by(day) %>%
+  summarise(convert_rate = sum(convert_ind)/n()) %>%
+  ggplot(aes(x = day, y = convert_rate)) +
+  geom_col()
+```
+
+#### day of week
+
+```{r}
+train %>%
+  mutate(day = wday(Quote_dt, label = T)) %>%
+  group_by(day) %>%
+  summarise(convert_rate = sum(convert_ind)/n()) %>%
+  ggplot(aes(x = day, y = convert_rate)) +
+  geom_col()
+```
+
+#### weekday/weekend
+
+```{r}
+train %>%
+  mutate(day = wday(Quote_dt)) %>%
+  mutate(weekday = if_else(day <=5, 'weekday', 'weekend')) %>%
+  group_by(weekday) %>%
+  summarise(convert_rate = sum(convert_ind)/n()) %>%
+  ggplot(aes(x = weekday, y = convert_rate)) +
+  geom_col()
+```
+
+## state_id
+
+```{r}
+train %>%
+  group_by(state_id) %>%
+  summarise(convert_rate = sum(convert_ind)/n()) %>%
+  ggplot(aes(x = state_id, y = convert_rate)) +
+  geom_col()
+```
+
+## county_name
+
+```{r}
+train %>%
+  group_by(county_name) %>%
+  summarise(convert_rate = sum(convert_ind)/n()) %>%
+  ggplot(aes(x = county_name, y = convert_rate)) +
+  geom_col()
+```
+
+## zip
+
+```{r}
+train %>%
+  group_by(zip) %>%
+  summarise(
+    num = n(),
+    convert_rate = sum(convert_ind)/n()
+    ) %>%
+  arrange(desc(convert_rate))
+```
+
+## CAT_zone
+
+```{r}
+train %>%
+  group_by(CAT_zone) %>%
+  summarise(convert_rate = sum(convert_ind)/n()) %>%
+  ggplot(aes(x = CAT_zone, y = convert_rate)) +
+  geom_col()
+```
+
+## number_drivers
+
+```{r}
+summary(train$number_drivers)
+```
+
+```{r}
+cor.test(train$convert_ind, train$number_drivers)
+```
+
+## primary_parking
+
+```{r}
+train %>%
+  group_by(primary_parking) %>%
+  summarise(convert_rate = sum(convert_ind)/n()) %>%
+  ggplot(aes(x = primary_parking, y = convert_rate)) +
+  geom_col()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

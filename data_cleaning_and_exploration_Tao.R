@@ -125,6 +125,7 @@ policy_zero$cv_index <- cut(seq(1, nrow(policy_zero)), breaks = 3, labels = F)
 train <- rbind(policy_one, policy_zero)
 
 save(train, test,  file = 'tao.RData')
+load('tao.RData')
 
 write.csv(train, 'train.csv', row.names = F, na = '')
 write.csv(test, 'test.csv', row.names = F, na = '')
@@ -132,5 +133,5 @@ write.csv(test, 'test.csv', row.names = F, na = '')
 
 # glm ---------------------------------------------------------------------
 
-glm_fit <- glm(convert_ind ~ . , data = train, family = binomial)
+glm_fit <- glm(convert_ind ~ . -cv_index, data = train, family = binomial)
 summary(glm_fit)
