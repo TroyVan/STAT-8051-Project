@@ -12,6 +12,7 @@ import xgboost as xgb
 import pandas as pd
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import train_test_split
+import xgbfir
 
 #set default folder
 import os
@@ -28,12 +29,9 @@ test.isnull().sum()
 train = train.fillna(-1)
 test = test.fillna(-1)
 
-#%% variable selection
+#%% find interaction term
 
-
-
-#%% xgboost classification
-X = train.iloc[:, 1:87]
+X = train.iloc[:, 1:77]
 y = train.iloc[:, 0]
 
 #X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state = 8051)
@@ -43,29 +41,46 @@ y = train.iloc[:, 0]
 X_train = xgb.DMatrix(data = X, label = y)
 
 param = {
-        'max_depth':3,
-        'eta':0.1,
-        'silent':1,
+        'max_depth':5,
+        'eta':0.0275,
         'objective':'binary:logistic',
         'n_jobs': 4,
         'subsample': 0.8,
-        'colsample_bytree': 0.6
+        'colsample_bytree': .85,
+        'min_child_weight': 31,
+        'max_delta_step': 8,
+        'num_parallel_tree': 7
         }
 
 cv = xgb.cv(param, X_train,
-       num_boost_round = 2000,
-       nfold = 3,
+       num_boost_round = 1000,
+       nfold = 4,
        metrics = {'auc'},
        seed = 8051,
-       early_stopping_rounds = 500,
-       verbose_eval  = False)
+       early_stopping_rounds = 200,
+       verbose_eval  = True)
 
+model = XGBClassifier(
+            max_depth = 8,
+            eta = 0.02279751,
+            objective = 'binary:logistic',
+            n_jobs = 4,
+            subsample = 0.7133214,
+            colsample_bytree = 0.7673029,
+            min_child_weight = 31,
+            max_delta_step = 8,
+            n_estimators = 260
+        )
 
-param_list  = {
-        'max_depth': range(1, 5),
-#        'learning_rate': [0.1, 0.05, 0.01, 0.005, 0.001]
-        }
+fit = model.fit(X, y)
 
-search = GridSearchCV(model, param_list, 'roc_auc', cv = 3, iid = False)
+xgbfir.saveXgbFI(fit, feature_names = list(X.columns), OutputXlsxFile = 'interaction.xlsx')
 
-search.fit(X, y)
+#param_list  = {
+#        'max_depth': range(1, 5),
+##        'learning_rate': [0.1, 0.05, 0.01, 0.005, 0.001]
+#        }
+#
+#search = GridSearchCV(model, param_list, 'roc_auc', cv = 3, iid = False)
+#
+#search.fit(X, y)
