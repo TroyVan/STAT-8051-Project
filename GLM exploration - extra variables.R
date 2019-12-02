@@ -93,6 +93,13 @@ glmcv(convert_ind ~ discount + state_id + quoted_amt +
         year)
 # Cross-Validation AUC = .6471
 
+mod = glm(convert_ind ~ discount + state_id + quoted_amt + 
+    Prior_carrier_grp + credit_score + Cov_package_type + CAT_zone + 
+    number_drivers + primary_parking + matching_owned_vehicles + 
+    matching_leased_vehicles + living_status + min_age + max_age + 
+    avg_age + prop_high_education + max_vehicle_age + avg_vehicle_age + 
+    year, binomial, policies_train)
+
 # Create extra variables
 
 for(i in 1:nrow(policies_test)){
@@ -142,17 +149,7 @@ policies_test$living_status = as.factor(policies_test$living_status)
 
 test_predictions = data.frame(
   policy_id = policies_test$policy_id,
-  conv_prob = predict(
-    glm(
-      convert_ind ~ discount + state_id + quoted_amt + 
-        Prior_carrier_grp + credit_score + Cov_package_type + CAT_zone + 
-        number_drivers + primary_parking + matching_owned_vehicles + 
-        matching_leased_vehicles + living_status + min_age + max_age + 
-        avg_age + prop_high_education + max_vehicle_age + avg_vehicle_age + 
-        year,
-      binomial, policies_train
-    ), policies_test, type = "response"
-  )
+  conv_prob = predict(mod, policies_test, type = "response")
 )
 # If no predicted probablity, use mean conversion rate as default
 test_predictions$conv_prob[is.na(test_predictions$conv_prob)] = mean(policies_train$convert_ind)
