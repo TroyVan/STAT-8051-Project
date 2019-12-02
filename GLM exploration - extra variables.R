@@ -157,6 +157,7 @@ test_predictions = data.frame(
 # If no predicted probablity, use mean conversion rate as default
 test_predictions$conv_prob[is.na(test_predictions$conv_prob)] = mean(policies_train$convert_ind)
 write.csv(test_predictions, "Troy's GLM exploration test predictions 2019-11-28.csv", row.names = FALSE)
+# Test score = .63887
 
 remove(i)
 remove(matching_drivers)
