@@ -31,6 +31,9 @@ policy_clean <- policy %>%
     county_name = as.integer(factor(county_name)),
     Agent_cd = as.integer(factor(Agent_cd))
   ) %>%
+  mutate(
+    avg_driver_amt = quoted_amt/number_drivers
+  ) %>%
   select(-Quote_dt, -(num_loaned_veh:total_number_veh))
 
 
@@ -92,53 +95,76 @@ merge_policy <- policy_clean %>%
   left_join(vehicle_clean, by = 'policy_id') %>%
   mutate(num_NA = policy_NA + veh_NA + driver_NA) %>%
   replace(., is.na(.), -1) %>%
-  select(-policy_NA, -veh_NA, -driver_NA)
-
-merge_policy <- merge_policy %>%
+  select(-policy_NA, -veh_NA, -driver_NA) %>%
   mutate(
-    i1 = mean_age - quoted_amt,
-    i2 = mean_edu - year,
-    i3 = CAT_zone - mean_age,
-    i4 = quoted_amt - year,
-    i5 = mean_age - zip,
-    i6 = mean_edu - quoted_amt,
-    i7 = quoted_amt - zip,
-    i8 = num_car - number_drivers,
-    i9 = credit_score - zip,
-    i10 = CAT_zone - quoted_amt,
-    i11 = mean_age - mean_edu,
-    i12 = credit_score - mean_age,
-    i13 = Cov_package_type - mean_age,
-    i14 = credit_score - quoted_amt,
-    i15 = mean_model - zip,
-    i16 = CAT_zone - mean_edu,
-    i17 = Agent_cd - zip,
-    i18 = CAT_zone - zip,
-    i19 = Agent_cd - mean_model,
-    i20 = mean_age - mean_safe
-  ) %>%
-  mutate(
-    m1 = mean_edu - quoted_amt -year,
-    m2 = CAT_zone - mean_age - quoted_amt,
-    m3 = mean_age - quoted_amt - zip,
-    m4 = mean_age - mean_edu - quoted_amt,
-    m5 = mean_age - mean_edu - year,
-    m6 = CAT_zone - mean_age - zip,
-    m7 = quoted_amt - year - zip,
-    m8 = mean_edu - year - zip,
-    m9 = CAT_zone - mean_age - mean_edu,
-    m10 = CAT_zone - num_liv_dep - zip,
-    m11 = mean_edu - quoted_amt - zip,
-    m12 = credit_score - mean_age - mean_edu,
-    m13 = discount - mean_edu - year,
-    m14 = CAT_zone - mean_edu - quoted_amt,
-    m15 = CAT_zone - mean_age - num_liv_dep,
-    m16 = mean_edu - min_age - year,
-    m17 = discount - quoted_amt - year,
-    m18 = credit_score - mean_age - zip,
-    m19 = mean_age - quoted_amt - year,
-    m20 = num_car - number_drivers - quoted_amt
+    avg_car_amt = quoted_amt/num_car
   )
+
+# merge_policy <- merge_policy %>%
+#   mutate(
+#     i1 = mean_age - quoted_amt,
+#     i2 = mean_edu - year,
+#     i3 = CAT_zone - mean_age,
+#     i4 = quoted_amt - year,
+#     i5 = mean_age - zip,
+#     i6 = mean_edu - quoted_amt,
+#     i7 = quoted_amt - zip,
+#     i8 = num_car - number_drivers,
+#     i9 = credit_score - zip,
+#     i10 = CAT_zone - quoted_amt,
+#     i11 = mean_age - mean_edu,
+#     i12 = credit_score - mean_age,
+#     i13 = Cov_package_type - mean_age,
+#     i14 = credit_score - quoted_amt,
+#     i15 = mean_model - zip,
+#     i16 = CAT_zone - mean_edu,
+#     i17 = Agent_cd - zip,
+#     i18 = CAT_zone - zip,
+#     i19 = Agent_cd - mean_model,
+#     i20 = mean_age - mean_safe,
+#     i21 = year - zip,
+#     i22 = Agent_cd - credit_score,
+#     i23 = mean_age - number_drivers,
+#     i24 = Prior_carrier_grp - quoted_amt,
+#     i25 = Agent_cd - quoted_amt,
+#     i26 = credit_score - mean_model,
+#     i27 = mean_model - quoted_amt,
+#     i28 = county_name - zip,
+#     i29 = mean_safe - zip,
+#     i30 = mean_age - mean_model
+#   ) %>%
+#   mutate(
+#     m1 = mean_edu - quoted_amt -year,
+#     m2 = CAT_zone - mean_age - quoted_amt,
+#     m3 = mean_age - quoted_amt - zip,
+#     m4 = mean_age - mean_edu - quoted_amt,
+#     m5 = mean_age - mean_edu - year,
+#     m6 = CAT_zone - mean_age - zip,
+#     m7 = quoted_amt - year - zip,
+#     m8 = mean_edu - year - zip,
+#     m9 = CAT_zone - mean_age - mean_edu,
+#     m10 = CAT_zone - num_liv_dep - zip,
+#     m11 = mean_edu - quoted_amt - zip,
+#     m12 = credit_score - mean_age - mean_edu,
+#     m13 = discount - mean_edu - year,
+#     m14 = CAT_zone - mean_edu - quoted_amt,
+#     m15 = CAT_zone - mean_age - num_liv_dep,
+#     m16 = mean_edu - min_age - year,
+#     m17 = discount - quoted_amt - year,
+#     m18 = credit_score - mean_age - zip,
+#     m19 = mean_age - quoted_amt - year,
+#     m20 = num_car - number_drivers - quoted_amt,
+#     m21 = CAT_zone - mean_edu - year,
+#     m22 = Prior_carrier_grp - mean_age - number_drivers,
+#     m23 = number_drivers - quoted_amt - year,
+#     m24 = credit_score - mean_edu - year,
+#     m25 = mean_edu - number_drivers - year,
+#     m26 = discount - mean_age - mean_edu,
+#     m27 = Cov_package_type - mean_age - mean_edu,
+#     m28 = Agent_cd - county_name - credit_score,
+#     m29 = Agent_cd - credit_score - zip,
+#     m30 = Agent_cd - mean_edu - year
+#   )
 
 train <- merge_policy %>%
   filter(split == 'Train') %>%
