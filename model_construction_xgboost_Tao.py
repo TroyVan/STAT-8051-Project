@@ -13,6 +13,8 @@ import pandas as pd
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import train_test_split
 import xgbfir
+from sklearn.metrics import roc_auc_score
+from matplotlib import pyplot as plt
 
 #set default folder
 import os
@@ -31,7 +33,7 @@ test = test.fillna(-1)
 
 #%% find interaction term
 
-X = train.iloc[:, 1:77]
+X = train.iloc[:, 1:train.shape[1]]
 y = train.iloc[:, 0]
 
 #X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state = 8051)
@@ -39,7 +41,7 @@ y = train.iloc[:, 0]
 #eval_set = [(X_test, y_test)]
 
 X_train = xgb.DMatrix(data = X, label = y)
-
+X_test = xgb.DMatrix(data = test.iloc[:, 1:test.shape[1]])
 param = {
         'max_depth':5,
         'eta':0.0275,
@@ -49,32 +51,37 @@ param = {
         'colsample_bytree': .85,
         'min_child_weight': 31,
         'max_delta_step': 8,
-        'num_parallel_tree': 7
+        'num_parallel_tree': 7,
+        'verbose': True
         }
 
 cv = xgb.cv(param, X_train,
        num_boost_round = 1000,
-       nfold = 4,
+       nfold = 3,
        metrics = {'auc'},
        seed = 8051,
        early_stopping_rounds = 200,
        verbose_eval  = True)
 
-model = XGBClassifier(
-            max_depth = 8,
-            eta = 0.02279751,
-            objective = 'binary:logistic',
-            n_jobs = 4,
-            subsample = 0.7133214,
-            colsample_bytree = 0.7673029,
-            min_child_weight = 31,
-            max_delta_step = 8,
-            n_estimators = 260
+clf = xgb.train(
+        param,
+        X_train,
+        300,
         )
 
-fit = model.fit(X, y)
+im = clf.get_score(importance_type='gain')
 
-xgbfir.saveXgbFI(fit, feature_names = list(X.columns), OutputXlsxFile = 'interaction.xlsx')
+xgb.plot_importance(clf, height = 0.5)
+
+pred = clf.predict(X_test)
+
+test['conv_prob'] = pred
+
+test[['policy_id', 'conv_prob']].to_csv('test_result_tao.csv', index = False)
+
+roc_auc_score(y, pred)
+
+xgbfir.saveXgbFI(clf, feature_names = list(X.columns), OutputXlsxFile = 'interaction.xlsx')
 
 #param_list  = {
 #        'max_depth': range(1, 5),
